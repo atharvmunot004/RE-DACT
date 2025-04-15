@@ -7,6 +7,7 @@ import fitz  # PyMuPDF
 import json
 import logging
 import datetime
+import matplotlib.pyplot as plt
 
 class Redactor:
 
@@ -559,6 +560,48 @@ class Redactor:
         except Exception as e:
             print(f"Error generating analysis and report: {e}")
             return None
+            
+    def generate_graphs(self, analysis_data):
+        """
+        Generates graphs based on the analysis data.
+
+        Parameters:
+            analysis_data (dict): The analysis data containing statistics like total words, obfuscated count, etc.
+
+        Returns:
+            None
+        """
+        try:
+            # Extract data from analysis
+            total_words = analysis_data["total_words"]
+            obfuscated_count = analysis_data["obfuscated_count"]
+            obfuscation_percentage = analysis_data["obfuscation_percentage"]
+
+            # Bar Chart: Total Words vs Obfuscated Words
+            plt.figure(figsize=(8, 6))
+            plt.bar(["Total Words", "Obfuscated Words"], [total_words, obfuscated_count], color=["blue", "red"])
+            plt.title("Total Words vs Obfuscated Words")
+            plt.ylabel("Count")
+            plt.savefig("output/word_analysis_bar_chart.png")
+            plt.show()
+
+            # Pie Chart: Obfuscation Percentage
+            plt.figure(figsize=(8, 6))
+            plt.pie(
+                [obfuscated_count, total_words - obfuscated_count],
+                labels=["Obfuscated", "Non-Obfuscated"],
+                autopct="%1.1f%%",
+                colors=["red", "green"],
+                startangle=90,
+            )
+            plt.title("Obfuscation Percentage")
+            plt.savefig("output/obfuscation_percentage_pie_chart.png")
+            plt.show()
+
+            print("Graphs generated and saved in the 'output/' folder.")
+
+        except Exception as e:
+            print(f"Error generating graphs: {e}")
 
 readactor = Redactor()
 with open('input.json', 'r', encoding='utf-8') as file:
@@ -579,4 +622,5 @@ if target_words is None:
     exit(-1)
 readactor.obfuscate(file_path, target_words, output_choice)
 print("Obfuscation completed successfully.")
-readactor.generate_analysis_and_report(file_path, doc_text, target_words, '[ REDACTED ]')
+analysis_data = readactor.generate_analysis_and_report(file_path, doc_text, target_words, '[ REDACTED ]')
+readactor.generate_graphs(analysis_data)
