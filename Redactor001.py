@@ -6,6 +6,7 @@ import re
 import fitz  # PyMuPDF
 import json
 import logging
+import datetime
 
 class Redactor:
 
@@ -513,8 +514,55 @@ class Redactor:
         else:
             self.__obfuscate_text(file_path, target_words)
 
+    def generate_analysis_and_report(self, file_path, doc_text, target_words, replacement_word):
+        """
+        Generates an analysis and report for the obfuscation process.
+
+        Parameters:
+            file_path (str): Path to the input file.
+            target_words (list): List of words that were obfuscated.
+            replacement_word (str): The word or pattern used for replacement.
+            output_file (str): Path to the obfuscated output file.
+
+        Returns:
+            dict: Analysis data.
+        """
+        try:
+            
+            original_content = doc_text
+
+            # Calculate statistics
+            total_words = len(original_content.split())
+            obfuscated_count = sum(original_content.count(word) for word in target_words)
+            obfuscation_percentage = (obfuscated_count / total_words) * 100 if total_words > 0 else 0
+
+            # Prepare analysis data
+            analysis_data = {
+                "file_name": os.path.basename(file_path),
+                "file_type": os.path.splitext(file_path)[1],
+                "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "total_words": total_words,
+                "obfuscated_count": obfuscated_count,
+                "obfuscation_percentage": round(obfuscation_percentage, 2),
+                "target_words": target_words,
+                "replacement_word": replacement_word
+            }
+
+            # Save the analysis as a JSON report
+            report_file = os.path.splitext(file_name)[0] + "_analysis.json"
+            with open(report_file, 'w', encoding='utf-8') as report:
+                json.dump(analysis_data, report, indent=4)
+
+            print(f"Analysis and report saved to {report_file}.")
+            return analysis_data
+
+        except Exception as e:
+            print(f"Error generating analysis and report: {e}")
+            return None
+
 readactor = Redactor()
-input_parameters = json.loads('input.json')
+with open('input.json', 'r', encoding='utf-8') as file:
+    input_parameters = json.load(file)
 file_name = input_parameters['file_name']
 user_choice = input_parameters['user_choice']
 user_options = input_parameters['user_options']
@@ -531,3 +579,4 @@ if target_words is None:
     exit(-1)
 readactor.obfuscate(file_path, target_words, output_choice)
 print("Obfuscation completed successfully.")
+readactor.generate_analysis_and_report(file_path, doc_text, target_words, '[ REDACTED ]')
