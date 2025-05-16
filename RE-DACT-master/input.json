@@ -1,0 +1,9 @@
+{
+    "file_name": "Test00.txt",
+    "user_choice": "custom",
+    "user_options": {
+        "custom": ["NN", "VB", "JJ"],
+        "gradation": 0
+    },
+    "output_choice": ""
+  }

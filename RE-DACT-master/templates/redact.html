@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="redaction-options">
+        <h2>Text Redaction</h2>
+        
+        <div class="option-group">
+            <label for="redactionMethod">Select Redaction Method:</label>
+            <select id="redactionMethod" name="redactionMethod" onchange="toggleOptions()">
+                <option value="gradation">Gradation</option>
+                <option value="custom">Custom</option>
+            </select>
+        </div>
+
+        <form action="/redact" method="POST" enctype="multipart/form-data" id="redactionForm">
+            <input type="hidden" name="method" id="methodField" value="gradation">
+            
+            <div id="gradationOptions" class="option-group">
+                <h3>Gradation Level</h3>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="gradation_level" value="1" checked> 
+                        Level 1 (Nouns)
+                    </label>
+                    <label>
+                        <input type="radio" name="gradation_level" value="2"> 
+                        Level 2 (Adjectives)
+                    </label>
+                    <label>
+                        <input type="radio" name="gradation_level" value="3"> 
+                        Level 3 (Adverbs)
+                    </label>
+                    <label>
+                        <input type="radio" name="gradation_level" value="4"> 
+                        Level 4 (Verbs)
+                    </label>
+                </div>
+            </div>
+
+            <div id="customOptions" class="option-group" style="display: none;">
+                <h3>Custom POS Tags</h3>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" name="pos_tags" value="NN"> 
+                        Noun (NN)
+                    </label>
+                    <label>
+                        <input type="checkbox" name="pos_tags" value="NNS"> 
+                        Plural Noun (NNS)
+                    </label>
+                    <label>
+                        <input type="checkbox" name="pos_tags" value="NNP"> 
+                        Proper Noun (NNP)
+                    </label>
+                    <label>
+                        <input type="checkbox" name="pos_tags" value="NNPS"> 
+                        Plural Proper Noun (NNPS)
+                    </label>
+                    <label>
+                        <input type="checkbox" name="pos_tags" value="VB"> 
+                        Verb (VB)
+                    </label>
+                    <label>
+                        <input type="checkbox" name="pos_tags" value="VBD"> 
+                        Past Tense Verb (VBD)
+                    </label>
+                    <label>
+                        <input type="checkbox" name="pos_tags" value="VBG"> 
+                        Gerund Verb (VBG)
+                    </label>
+                    <label>
+                        <input type="checkbox" name="pos_tags" value="JJ"> 
+                        Adjective (JJ)
+                    </label>
+                    <label>
+                        <input type="checkbox" name="pos_tags" value="JJR"> 
+                        Comparative Adjective (JJR)
+                    </label>
+                    <label>
+                        <input type="checkbox" name="pos_tags" value="JJS"> 
+                        Superlative Adjective (JJS)
+                    </label>
+                </div>
+            </div>
+            
+            <div class="file-upload">
+                <h3>Upload Document</h3>
+                <label for="file">Select File:</label>
+                <input type="file" name="file" id="file" required><br><br>
+                
+                <button type="submit">Process Document</button>
+            </div>
+        </form>
+    </div>
+
+    {% if processed_file_path %}
+        <div class="processed-document">
+            <h3>Processed Document</h3>
+            <p>Your document has been successfully processed!</p>
+            
+            <div class="action-buttons">
+                <!-- Add the same download button style as dashboard -->
+                <a href="{{ url_for('download_file', filename=processed_filename) }}" class="btn btn-primary">Download Redacted Document</a>
+                
+                <!-- Add view analysis button -->
+                <a href="{{ url_for('view_analysis', filename=processed_filename) }}" class="btn">View Analysis</a>
+            </div>
+        </div>
+    {% endif %}
+    
+    <div class="text-preview">
+        <h3>Text Preview</h3>
+        <textarea id="previewText" class="text-area" placeholder="Enter text to redact..."></textarea>
+        <div class="button-group">
+            <button onclick="previewRedaction()">Preview Redaction</button>
+            <button onclick="downloadRedactedText()" id="downloadBtn" style="display: none;">Download Redacted Text</button>
+        </div>
+        <div id="redactedPreview" class="preview-result"></div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+<style>
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 15px;
+    }
+    
+    .btn-primary {
+        display: inline-block;
+        padding: 8px 16px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+    
+    .btn {
+        display: inline-block;
+        padding: 8px 16px;
+        background-color: #6c757d;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn:hover {
+        background-color: #5a6268;
+    }
+    
+    .processed-document {
+        margin: 20px 0;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        border-left: 4px solid #28a745;
+    }
+</style>
+{% endblock %}
