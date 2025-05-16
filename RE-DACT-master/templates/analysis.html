@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>Document Analysis</h1>
+    
+    <div class="analysis-card">
+        <h2>{{ analysis.file_name }}</h2>
+        <p><strong>File Type:</strong> {{ analysis.file_type }}</p>
+        <p><strong>Processed At:</strong> {{ analysis.timestamp }}</p>
+        <p><strong>Total Words:</strong> {{ analysis.total_words }}</p>
+        <p><strong>Redacted Words:</strong> {{ analysis.obfuscated_count }}</p>
+        <p><strong>Redaction Percentage:</strong> {{ analysis.obfuscation_percentage }}%</p>
+        
+        <h3>Redacted Words</h3>
+        <div class="tag-cloud">
+            {% for word in analysis.target_words %}
+            <span class="redacted-tag">{{ word }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <a href="{{ url_for('dashboard') }}" class="btn">Back to Dashboard</a>
+</div>
+{% endblock %}
